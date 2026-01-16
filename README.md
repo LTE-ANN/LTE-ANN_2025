@@ -19,7 +19,7 @@ README.md 양식
  2. 사용 기술 및 환경
 - **Language:** (예: Python, JavaScript, C++, Unity 등)
 - **Library / Framework:** (예: React, Pygame, OpenCV 등)
-- **기타 도구:** (예: Arduino, Figma 등)
+- **기타 도구:*
 
  3. 실행 방법
 - 이 코드를 어떻게 실행해야 하는지 순서대로 적어주세요.
