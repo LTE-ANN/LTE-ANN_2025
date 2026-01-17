@@ -1,0 +1,417 @@
+:root{
+  --bg:#040705;
+  --panel: rgba(8,18,10,0.78);
+  --fg:#b7ffcd;
+  --dim: rgba(183,255,205,0.70);
+
+  --line: rgba(60,255,160,0.22);
+  --edgeOn: rgba(80,255,180,0.95);
+  --edgeOff: rgba(80,255,180,0.18);
+  --glow: rgba(60,255,160,0.22);
+
+  --warn:#ffd36a;
+  --bad:#ff5f70;
+  --cyan: rgba(120,220,255,0.90);
+
+  /* ✅ 여기만 바꾸면 노드 폭 바뀜 */
+  --nodeW: 108px;     /* 50px는 사실상 글/포트 때문에 깨짐. 90~120 추천 */
+  --nodePadX: 8px;
+  --nodePadY: 8px;
+  --portSize: 10px;
+  --portInset: -6px;
+}
+
+*{box-sizing:border-box}
+
+.crt-body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(1200px 800px at 30% 10%, rgba(60,255,160,0.08), transparent 60%),
+    radial-gradient(900px 700px at 70% 80%, rgba(60,255,160,0.06), transparent 55%),
+    linear-gradient(180deg, #020402, var(--bg));
+  color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  letter-spacing: 0.2px;
+}
+
+.crt{
+  position:relative;
+  width:min(1180px, 96vw);
+  height:min(760px, 94vh);
+  border-radius: 14px;
+  border: 1px solid rgba(60,255,160,0.25);
+  background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.12));
+  box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 60px rgba(60,255,160,0.12);
+  overflow:hidden;
+}
+.crt::before{
+  content:"";
+  position:absolute; inset:0;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.35) 0px,
+      rgba(0,0,0,0.35) 1px,
+      rgba(0,0,0,0.00) 3px,
+      rgba(0,0,0,0.00) 4px
+    );
+  opacity:0.20;
+  mix-blend-mode:multiply;
+}
+.crt::after{
+  content:"";
+  position:absolute; inset:-40px;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(60,255,160,0.10), transparent 55%),
+    radial-gradient(circle at 50% 50%, transparent 45%, rgba(0,0,0,0.55) 85%);
+  filter: blur(6px);
+  opacity:0.9;
+}
+@keyframes crtFlicker{
+  0%{opacity:1}
+  2%{opacity:0.92}
+  3%{opacity:1}
+  5%{opacity:0.96}
+  100%{opacity:1}
+}
+.crt{ animation: crtFlicker 4.5s infinite; }
+.crt, .crt *{ text-shadow: 0 0 8px rgba(60,255,160,0.12); }
+
+.panel{
+  background: var(--panel);
+  border: 1px solid rgba(60,255,160,0.18);
+  border-radius: 12px;
+  box-shadow: 0 0 18px rgba(60,255,160,0.06);
+}
+
+.topbar{
+  margin:14px 14px 10px;
+  padding:12px 14px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+}
+.hleft{min-width:0;}
+.brand-title{ font-size:16px; }
+.brand-sub{ font-size:12px; color:var(--dim); margin-top:4px; line-height:1.35; }
+
+.topline{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:6px;
+  font-size:11px;
+  color:rgba(183,255,205,0.75);
+}
+
+.pill{
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid rgba(60,255,160,0.22);
+  background:rgba(0,0,0,0.18);
+}
+.pill.warn{border-color:rgba(255,95,112,0.35); color:rgba(255,167,178,0.92)}
+.pill.cyan{border-color:rgba(120,220,255,0.25); color:rgba(180,245,255,0.9)}
+
+.top-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+button{
+  background: rgba(8,18,10,0.88);
+  color: var(--fg);
+  border: 1px solid rgba(60,255,160,0.25);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: inherit;
+  cursor:pointer;
+}
+button:hover{ box-shadow: 0 0 18px rgba(60,255,160,0.14); }
+button:active{ transform: translateY(1px); }
+button:disabled{ opacity:.45; cursor:not-allowed; }
+
+.layout{
+  height: calc(100% - 84px);
+  display:grid;
+  grid-template-columns: 1.35fr 0.65fr;
+  gap:10px;
+  padding: 0 14px 14px;
+  min-height:0;
+}
+
+.board{
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-height:0;
+}
+.row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.section-title{ font-size:12px; color: var(--dim); }
+.mini{ font-size:11px; color:rgba(183,255,205,0.70); }
+
+.board-area{
+  position:relative;
+  flex:1;
+  min-height:0;
+  border:1px solid rgba(60,255,160,0.14);
+  border-radius:12px;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.44), rgba(0,0,0,0.14)),
+    repeating-linear-gradient(90deg, rgba(60,255,160,0.05) 0px, rgba(60,255,160,0.05) 1px, transparent 52px, transparent 54px);
+}
+
+/* overlay (원하면 끄면 됨) */
+.glitchOverlay{
+  position:absolute; inset:0;
+  pointer-events:none;
+  opacity:.10;
+  mix-blend-mode:screen;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,95,112,.28) 0px, rgba(255,95,112,.28) 1px, transparent 10px, transparent 12px),
+    repeating-linear-gradient(90deg, rgba(120,220,255,.18) 0px, rgba(120,220,255,.18) 1px, transparent 80px, transparent 82px);
+  animation: glitch 7.5s infinite linear;
+}
+@keyframes glitch{
+  0%{transform:translate(0,0)}
+  14%{transform:translate(0,0)}
+  15%{transform:translate(8px,-3px)}
+  16%{transform:translate(-5px,2px)}
+  17%{transform:translate(0,0)}
+  62%{transform:translate(0,0)}
+  63%{transform:translate(-9px,4px)}
+  64%{transform:translate(7px,-2px)}
+  65%{transform:translate(0,0)}
+  100%{transform:translate(0,0)}
+}
+
+/* ✅ wires / nodes layer */
+svg#wires{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  z-index:1;
+  pointer-events:auto;
+}
+.nodes-layer{
+  position:absolute; inset:0;
+  z-index:2;
+}
+
+/* =========================
+   ✅ NODE (폭/높이 체감되게)
+   ========================= */
+.node{
+  position:absolute;
+  width: var(--nodeW);
+  padding: var(--nodePadY) var(--nodePadX);
+  border-radius: 12px;
+  border:1px solid rgba(60,255,160,0.26);
+  background: rgba(7,18,11,0.92);
+  box-shadow: 0 0 18px rgba(60,255,160,0.06);
+  user-select:none;
+  z-index:3;
+  backdrop-filter: blur(1px);
+}
+
+.node.danger{
+  border-color: rgba(255,95,112,0.35);
+  box-shadow: 0 0 18px rgba(255,95,112,0.08);
+}
+
+/* 내부 텍스트를 폭이 작아도 버티게 */
+.node .head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+  margin-bottom:6px;
+}
+.node .name{
+  font-size:11px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width: 64%;
+}
+.node .tag{
+  font-size:9px;
+  padding:2px 6px;
+  border:1px solid rgba(60,255,160,0.22);
+  border-radius:999px;
+  color:var(--dim);
+  white-space:nowrap;
+}
+.node.danger .tag{
+  border-color: rgba(255,95,112,0.28);
+  color: rgba(255,167,178,0.9);
+}
+
+.node .fn{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  font-size:10px;
+  color:var(--dim);
+}
+.node .fn b{
+  color:var(--warn);
+  font-weight:600;
+  white-space:nowrap;
+}
+
+/* (네 JS가 hint div를 넣을 때 대비) */
+.node .hint{
+  margin-top:6px;
+  font-size:10px;
+  color:rgba(183,255,205,0.55);
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* =========================
+   PORT (노드 줄이면 포트도 같이 줄여야 체감됨)
+   ========================= */
+.port{
+  position:absolute;
+  width:var(--portSize);
+  height:var(--portSize);
+  border-radius:999px;
+  border:1px solid rgba(60,255,160,0.62);
+  background: rgba(0,0,0,0.78);
+  box-shadow: 0 0 10px rgba(60,255,160,0.12);
+  pointer-events:auto;
+  cursor:crosshair;
+}
+.node.danger .port{ border-color: rgba(255,95,112,0.55); }
+
+.port.in{
+  left: var(--portInset);
+  top:50%;
+  transform:translateY(-50%);
+}
+.port.out{
+  right: var(--portInset);
+  top:50%;
+  transform:translateY(-50%);
+}
+.port.hover{
+  outline:2px solid rgba(255,211,106,.85);
+  outline-offset:2px;
+}
+
+/* =========================
+   EDGES
+   ========================= */
+.edge{
+  stroke: var(--edgeOn);
+  stroke-width:3;
+  fill:none;
+  stroke-linecap:round;
+  filter: drop-shadow(0 0 6px rgba(80,255,180,0.22));
+  pointer-events:stroke;
+  cursor:pointer;
+}
+.edge.temp{
+  stroke: rgba(255,211,106,0.85);
+  stroke-dasharray: 7 6;
+  filter:none;
+  pointer-events:none;
+  opacity:.95;
+}
+.edge.bad{
+  stroke: var(--bad);
+  stroke-dasharray: 6 6;
+  filter:none;
+  opacity:.75;
+  pointer-events:none;
+}
+
+/* =========================
+   SIDE PANELS
+   ========================= */
+.side{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-height:0;
+}
+.box{ padding:12px; }
+.tip{
+  font-size:12px;
+  color:var(--dim);
+  line-height:1.45;
+  white-space:pre-line;
+}
+.mono{ color:var(--warn); }
+.log{
+  font-size:12px;
+  line-height:1.35;
+  color:var(--dim);
+  white-space:pre-wrap;
+  border-top:1px solid rgba(60,255,160,0.12);
+  margin-top:10px;
+  padding-top:10px;
+  max-height:190px;
+  overflow:auto;
+}
+.slider{ width:100%; }
+
+canvas{
+  width:100%;
+  height:160px;
+  border-radius:10px;
+  border:1px solid rgba(60,255,160,0.12);
+  background: rgba(0,0,0,0.18);
+  display:block;
+}
+
+/* =========================
+   TOAST
+   ========================= */
+.toast{
+  position:absolute;
+  left:50%;
+  top:14px;
+  transform:translateX(-50%);
+  z-index:20;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(60,255,160,0.28);
+  background: rgba(5,12,8,0.88);
+  box-shadow: 0 0 30px rgba(60,255,160,0.12);
+  min-width:min(680px, 92vw);
+  display:none;
+}
+.toast.show{display:block;}
+.toast .t1{font-size:12px; color:rgba(183,255,205,0.88); letter-spacing:.2px;}
+.toast .t2{margin-top:4px; font-size:11px; color:rgba(183,255,205,0.62);}
+
+.toast.ok{border-color:rgba(60,255,160,0.35)}
+.toast.bad{border-color:rgba(255,95,112,0.42)}
+.toast.bad .t1{color:rgba(255,167,178,0.95)}
+.toast.cyan{border-color:rgba(120,220,255,0.35)}
+.toast.cyan .t1{color:rgba(190,250,255,0.95)}
+
+/* =========================
+   OPERATOR
+   ========================= */
+.agentRow{display:flex; gap:10px; align-items:flex-start;}
+.agentImg{
+  width:96px; height:96px;
+  object-fit:cover;
+  border-radius:12px;
+  border:1px solid rgba(60,255,160,0.18);
+  filter: contrast(1.05) saturate(0.9);
+}
+.agentText{flex:1; min-width:0;}
+#agentMsg{font-size:12px; color:rgba(183,255,205,0.90); line-height:1.45; white-space:pre-line;}
+#agentSub{margin-top:6px;}

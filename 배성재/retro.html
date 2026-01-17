@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>NEURAL INFILTRATION CONSOLE</title>
+<style>
+  :root{
+    --bg:#050806;
+    --panel:rgba(7,16,10,.86);
+    --fg:#b7ffcd;
+    --dim:rgba(183,255,205,.62);
+    --line:rgba(80,255,180,.95);
+    --warn:#ffd36a;
+    --border:rgba(60,255,160,.20);
+    --nodeBg:rgba(7,18,11,.92);
+    --bad:#ff5f70;
+    --cyan:rgba(120,220,255,.9);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(1100px 800px at 30% 10%, rgba(60,255,160,.08), transparent 60%),
+      radial-gradient(900px 700px at 80% 80%, rgba(60,255,160,.06), transparent 55%),
+      linear-gradient(180deg,#020402,var(--bg));
+    color:var(--fg);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  .crt{
+    width:min(1320px, 98vw);
+    height:min(860px, 96vh);
+    border-radius:14px;
+    border:1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,0,0,.40), rgba(0,0,0,.12));
+    box-shadow: 0 0 0 4px rgba(0,0,0,.35), 0 0 60px rgba(60,255,160,.12);
+    overflow:hidden;
+    position:relative;
+  }
+  .crt::before{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,.34) 0px, rgba(0,0,0,.34) 1px, transparent 3px, transparent 4px);
+    opacity:.22;
+    mix-blend-mode:multiply;
+  }
+  .crt::after{
+    content:"";
+    position:absolute; inset:-40px;
+    pointer-events:none;
+    background:
+      radial-gradient(900px 480px at 50% 30%, rgba(60,255,160,.08), transparent 55%),
+      radial-gradient(700px 520px at 70% 75%, rgba(255,211,106,.05), transparent 60%);
+    filter: blur(10px);
+    opacity:.65;
+  }
+
+  header{
+    position:relative;
+    z-index:6;
+    padding:12px 14px 10px;
+    display:flex;
+    gap:12px;
+    align-items:flex-end;
+    justify-content:space-between;
+    border-bottom:1px solid rgba(60,255,160,.14);
+    background:var(--panel);
+  }
+  .hleft{display:flex; flex-direction:column; gap:6px;}
+  .title{font-size:15px; margin:0; letter-spacing:.5px;}
+  .sub{font-size:12px; color:var(--dim); line-height:1.35;}
+  .topline{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    font-size:11px; color:rgba(183,255,205,.7);
+  }
+  .pill{
+    padding:2px 8px;
+    border-radius:999px;
+    border:1px solid rgba(60,255,160,.22);
+    background:rgba(0,0,0,.18);
+  }
+  .pill.warn{border-color:rgba(255,95,112,.35); color:rgba(255,167,178,.92)}
+  .pill.cyan{border-color:rgba(120,220,255,.25); color:rgba(180,245,255,.9)}
+  .actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  button{
+    background: rgba(6,14,9,.92);
+    color:var(--fg);
+    border:1px solid rgba(60,255,160,.22);
+    border-radius:10px;
+    padding:8px 10px;
+    font:inherit;
+    cursor:pointer;
+    letter-spacing:.2px;
+  }
+  button:hover{ box-shadow: 0 0 18px rgba(60,255,160,.14); }
+  button:active{ transform: translateY(1px); }
+  button:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .wrap{
+    position:relative;
+    z-index:5;
+    display:grid;
+    grid-template-columns: 1.35fr 0.65fr;
+    gap:12px;
+    padding:12px 14px 14px;
+    height:calc(100% - 74px);
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid rgba(60,255,160,.16);
+    border-radius:12px;
+    box-shadow: 0 0 18px rgba(60,255,160,.06);
+  }
+
+  .board{
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height:0;
+  }
+  .label{font-size:12px; color:var(--dim);}
+  .row{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+  .mini{font-size:11px; color:var(--dim);}
+
+  .board-area{
+    position:relative;
+    flex:1;
+    min-height:590px;
+    border-radius:12px;
+    border:1px solid rgba(60,255,160,.12);
+    overflow:hidden;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.44), rgba(0,0,0,.14)),
+      repeating-linear-gradient(90deg, rgba(60,255,160,.06) 0px, rgba(60,255,160,.06) 1px, transparent 52px, transparent 54px);
+  }
+
+  .glitchOverlay{
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity:.13;
+    mix-blend-mode:screen;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,95,112,.35) 0px, rgba(255,95,112,.35) 1px, transparent 10px, transparent 12px),
+      repeating-linear-gradient(90deg, rgba(120,220,255,.25) 0px, rgba(120,220,255,.25) 1px, transparent 80px, transparent 82px);
+    animation: glitch 7.5s infinite linear;
+  }
+  @keyframes glitch{
+    0%{transform:translate(0,0)}
+    14%{transform:translate(0,0)}
+    15%{transform:translate(8px,-3px)}
+    16%{transform:translate(-5px,2px)}
+    17%{transform:translate(0,0)}
+    62%{transform:translate(0,0)}
+    63%{transform:translate(-9px,4px)}
+    64%{transform:translate(7px,-2px)}
+    65%{transform:translate(0,0)}
+    100%{transform:translate(0,0)}
+  }
+
+  svg#wires{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    z-index:1;
+    pointer-events:auto;
+  }
+  .nodes-layer{
+    position:absolute; inset:0;
+    z-index:2;
+  }
+
+  .node{
+    position:absolute;
+    width:148px;
+    padding:9px 9px 8px;
+    border-radius:14px;
+    border:1px solid rgba(60,255,160,.26);
+    background: var(--nodeBg);
+    box-shadow: 0 0 18px rgba(60,255,160,.07);
+    user-select:none;
+    z-index:3;
+  }
+  .node.danger{
+    border-color:rgba(255,95,112,.32);
+    box-shadow: 0 0 18px rgba(255,95,112,.09);
+  }
+  .node .head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:7px;
+  }
+  .node .name{font-size:12px;}
+  .node .tag{
+    font-size:10px;
+    padding:2px 6px;
+    border:1px solid rgba(60,255,160,.24);
+    border-radius:999px;
+    color:var(--dim);
+  }
+  .node.danger .tag{border-color:rgba(255,95,112,.28); color:rgba(255,167,178,.9);}
+  .node .fn{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    font-size:11px;
+    color:var(--dim);
+  }
+  .node .fn b{color:var(--warn); font-weight:600;}
+
+  .port{
+    position:absolute;
+    width:12px; height:12px;
+    border-radius:999px;
+    border:1px solid rgba(60,255,160,.62);
+    background: rgba(0,0,0,.78);
+    box-shadow: 0 0 10px rgba(60,255,160,.12);
+    pointer-events:auto;
+    cursor:crosshair;
+  }
+  .node.danger .port{border-color:rgba(255,95,112,.55)}
+  .port.in{ left:-7px; top:50%; transform:translateY(-50%); }
+  .port.out{ right:-7px; top:50%; transform:translateY(-50%); }
+  .port.hover{
+    outline:2px solid rgba(255,211,106,.85);
+    outline-offset:2px;
+  }
+
+  .edge{
+    stroke: var(--line);
+    stroke-width:3;
+    fill:none;
+    stroke-linecap:round;
+    filter: drop-shadow(0 0 6px rgba(80,255,180,.22));
+    pointer-events:stroke;
+    cursor:pointer;
+  }
+  .edge.temp{
+    stroke: rgba(255,211,106,.85);
+    stroke-dasharray: 7 6;
+    filter:none;
+    pointer-events:none;
+    opacity:.95;
+  }
+  .edge.bad{
+    stroke: var(--bad);
+    stroke-dasharray: 6 6;
+    filter:none;
+    opacity:.75;
+    pointer-events:none;
+  }
+
+  .side{
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height:0;
+  }
+  .box{ padding:12px; }
+  .tip{
+    font-size:12px;
+    color:var(--dim);
+    line-height:1.45;
+    white-space:pre-line;
+  }
+  .mono{color:var(--warn);}
+  .log{
+    font-size:12px;
+    line-height:1.35;
+    color:var(--dim);
+    white-space:pre-wrap;
+    border-top:1px solid rgba(60,255,160,.12);
+    margin-top:10px;
+    padding-top:10px;
+    max-height:190px;
+    overflow:auto;
+  }
+  .slider{width:100%;}
+  canvas{
+    width:100%;
+    height:160px;
+    border-radius:10px;
+    border:1px solid rgba(60,255,160,.12);
+    background: rgba(0,0,0,.18);
+    display:block;
+  }
+
+  .toast{
+    position:absolute;
+    left:50%;
+    top:14px;
+    transform:translateX(-50%);
+    z-index:20;
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(60,255,160,.28);
+    background: rgba(5,12,8,.88);
+    box-shadow: 0 0 30px rgba(60,255,160,.12);
+    min-width:min(680px, 92vw);
+    display:none;
+  }
+  .toast.show{display:block;}
+  .toast .t1{font-size:12px; color:rgba(183,255,205,.88); letter-spacing:.2px;}
+  .toast .t2{margin-top:4px; font-size:11px; color:rgba(183,255,205,.62);}
+
+  .toast.ok{border-color:rgba(60,255,160,.35)}
+  .toast.bad{border-color:rgba(255,95,112,.42)}
+  .toast.bad .t1{color:rgba(255,167,178,.95)}
+  .toast.cyan{border-color:rgba(120,220,255,.35)}
+  .toast.cyan .t1{color:rgba(190,250,255,.95)}
+
+  .agentRow{display:flex; gap:10px; align-items:flex-start;}
+  .agentImg{
+    width:96px; height:96px;
+    object-fit:cover;
+    border-radius:12px;
+    border:1px solid rgba(60,255,160,.18);
+    filter: contrast(1.05) saturate(0.9);
+  }
+  .agentText{flex:1; min-width:0;}
+  #agentMsg{font-size:12px; color:rgba(183,255,205,.90); line-height:1.45; white-space:pre-line;}
+  #agentSub{margin-top:6px;}
+</style>
+</head>
+
+<body>
+<div class="crt">
+  <div id="toast" class="toast">
+    <div class="t1" id="toast1"></div>
+    <div class="t2" id="toast2"></div>
+  </div>
+
+  <header>
+    <div class="hleft">
+      <div class="topline">
+        <span class="pill warn" id="tracePill">TRACE: 17%</span>
+        <span class="pill cyan" id="sessionPill">SESSION: GHOST-LINK</span>
+        <span class="pill" id="nodeCountPill">NODES: --</span>
+        <span class="pill" id="edgeCountPill">WIRES: --</span>
+      </div>
+      <h1 class="title">NEURAL INFILTRATION CONSOLE</h1>
+      <div class="sub">적성 AI의 내부 회로를 조작해 출력 경로를 원하는 형태로 왜곡한다. 흔적을 남기지 마라.</div>
+    </div>
+
+    <div class="actions">
+      <button id="btnReset" type="button">PURGE</button>
+      <button id="btnHint" type="button">HINT</button>
+      <button id="btnAck" type="button">ACK</button>
+      <button id="btnCommit" type="button" disabled>COMMIT</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="board panel">
+      <div class="row">
+        <div class="label">INTERNAL GRAPH (LIVE)</div>
+        <div class="mini" id="stageBadge">—</div>
+      </div>
+
+      <div id="board" class="board-area">
+        <div class="glitchOverlay"></div>
+        <svg id="wires"></svg>
+        <div id="nodesLayer" class="nodes-layer"></div>
+      </div>
+
+      <div class="label">• 포트(out) 드래그 → 포트(in) 투입 · 같은 연결 재시도 = 토글 해제 · 선 클릭 = 즉시 절단</div>
+    </section>
+
+    <aside class="side">
+      <div class="panel box">
+        <div class="row">
+          <div class="label">🎯 OVERRIDE TARGET</div>
+          <div class="mini" id="clearBadge">—</div>
+        </div>
+        <div class="tip"><span class="mono" id="targetEq">—</span></div>
+        <canvas id="plot"></canvas>
+        <div class="mini">회색 점선: 목표 · 초록: 현재(적 AI 내부 출력)</div>
+      </div>
+
+      <div class="panel box">
+        <div class="label">🧩 CURRENT PATH</div>
+        <div class="tip">수식: <span class="mono" id="netEq">—</span></div>
+        <div class="tip">입력 x: <span class="mono" id="xVal">0</span></div>
+        <input class="slider" id="xSlider" type="range" min="-3" max="3" step="0.05" value="0">
+        <div class="tip">출력 y: <span class="mono" id="yVal">0</span></div>
+        <div class="log" id="flowLog"></div>
+      </div>
+
+      <div class="panel box agent">
+        <div class="label">OPERATOR</div>
+        <div class="agentRow">
+          <img src="agent.jpg" alt="agent" class="agentImg">
+          <div class="agentText">
+            <div id="agentMsg">—</div>
+            <div id="agentSub" class="mini">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel box">
+        <div class="label">INTRUSION LOG</div>
+        <div class="log" id="log"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- 중요: JS는 DOM 뒤에서 로드 -->
+<script src="script.js"></script>
+</body>
+</html>
