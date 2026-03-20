@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>소수 결</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="title">소수 결</div>
+
+      <div class="phasebox">
+        <div class="phase" id="phaseBadge">idle</div>
+        <div class="timer" id="timeLine"></div>
+      </div>
+
+      <div class="score" id="scoreLine"></div>
+    </header>
+
+    <main class="main">
+      <section class="card">
+        <div class="cardhead">
+          <div class="cardtitle">게임</div>
+          <div class="actions">
+            <label class="lab">P1</label>
+            <input id="p1name" value="A" class="inp" />
+            <label class="lab">P2</label>
+            <input id="p2name" value="B" class="inp" />
+            <button id="btnNew" class="btn primary">새 게임</button>
+            <button id="btnRefresh" class="btn">새로고침</button>
+            <button id="btnReset" class="btn ghost">리셋</button>
+          </div>
+        </div>
+
+        <div class="bigNumber">
+          <div class="bigNumberLabel" id="statusLine"></div>
+          <div class="bigNumberValue" id="bigNumberValue">---</div>
+          <div class="subNumber" id="numberLine"></div>
+          <div class="hint">
+            버저 단축키: 1 = p1, 2 = p2
+          </div>
+          <div class="hint">
+            답 단축키(선택): q = 소수, w = 소수 아님
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardhead">
+          <div class="cardtitle">제출</div>
+          <div class="row">
+            <label class="lab">플레이어</label>
+            <select id="player" class="sel">
+              <option value="p1">p1</option>
+              <option value="p2">p2</option>
+            </select>
+
+            <label class="lab">자리</label>
+            <select id="pos" class="sel">
+              <option value="hundreds">hundreds</option>
+              <option value="tens">tens</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="cards" class="cardsGrid"></div>
+        <div id="msg" class="msg"></div>
+      </section>
+
+      <section class="card">
+        <div class="cardhead">
+          <div class="cardtitle">버저</div>
+          <div class="row">
+            <label class="lab">답변 플레이어</label>
+            <select id="buzzPlayer" class="sel">
+              <option value="p1">p1</option>
+              <option value="p2">p2</option>
+            </select>
+
+            <button id="btnReveal" class="btn primary">공개(0)</button>
+            <button id="btnBuzz" class="btn danger">버저</button>
+            <button id="btnPrime" class="btn">소수</button>
+            <button id="btnNotPrime" class="btn">소수 아님</button>
+          </div>
+        </div>
+        <div id="buzzLine" class="subtle"></div>
+      </section>
+
+      <section class="card">
+        <div class="cardhead">
+          <div class="cardtitle">라운드 기록</div>
+        </div>
+        <pre id="log" class="log"></pre>
+      </section>
+
+      <section class="card">
+        <div class="cardhead">
+          <div class="cardtitle">원본 상태(JSON)</div>
+        </div>
+        <pre id="raw" class="log"></pre>
+      </section>
+    </main>
+
+  </div>
+    <div class="chatbar">
+    <div class="chathead">
+      <div class="chattitle">핸냄 2.0</div>
+      <button id="chatClear" class="btn small" type="button">대화 초기화</button>
+    </div>
+
+    <div id="chatLog" class="chatlog"></div>
+
+    <form id="chatForm" class="chatform">
+      <input id="chatInput" class="chatinput" placeholder="핸냄 2.0한테 말 걸기" autocomplete="off" />
+      <button class="btn" type="submit">전송</button>
+    </form>
+  </div>
+
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
